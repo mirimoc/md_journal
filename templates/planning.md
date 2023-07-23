@@ -1,18 +1,18 @@
 ---
 title: {{NAME}}
 date: {{DATE}}
-template: "Planing"
+template: "Planning"
 tags: {{TAGS}}
 ---
+
 # {{DATE}} - Planing: {{NAME}}
-## Tasks
+
+## Current Status
 
 ## Challenges
 
 ## Solutions
 
-## Learnings
+## Tasks
 
-## Current Status
 
-## Next Steps

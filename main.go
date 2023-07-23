@@ -84,7 +84,10 @@ func main() {
 
 	// If no arguments are provided, use the default template
 	if len(args) == 0 {
-		template = "default.md" // Set the default template name to "default"
+		template = "task.md" // Set the default template name to "default"
+	} else if len(args) == 1 {
+		// If two or more arguments are provided, use the provided template and name
+		template = args[0]
 	} else if len(args) >= 2 {
 		// If two or more arguments are provided, use the provided template and name
 		template = args[0]

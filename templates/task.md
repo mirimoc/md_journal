@@ -1,10 +1,11 @@
 ---
 title: {{NAME}}
 date: {{DATE}}
-template: "Default"
+template: "Task"
 tags: {{TAGS}}
 ---
-# {{DATE}} - Planing: {{NAME}}
+
+# {{DATE}} - Task
 ## Tasks
 
 ## Challenges
