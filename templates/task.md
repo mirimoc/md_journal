@@ -1,5 +1,5 @@
 ---
-title: {{NAME}}
+title: "{{NAME}}"
 date: {{DATE}}
 template: "Task"
 tags: {{TAGS}}

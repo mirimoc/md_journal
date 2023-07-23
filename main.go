@@ -66,43 +66,82 @@ func getDefaultOutputFileName(template, name string) string {
 	return fmt.Sprintf("docs/journal/%s_%s_%s", formattedDate, formattedTime, template)
 }
 
-func getUserInput(prompt string) string {
-	fmt.Print(prompt)
+func getUserInput(prompt string, args ...interface{}) string {
+	fmt.Printf(prompt, args...)
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
 	return strings.TrimSpace(input)
 }
 
+func listMarkdownFiles(folderPath string) []string {
+	var markdownFiles []string
+
+	files, err := ioutil.ReadDir(folderPath)
+	if err != nil {
+		fmt.Printf("Error reading the folder: %s\n", err)
+		return nil
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			// Skip directories
+			continue
+		}
+
+		if strings.HasSuffix(file.Name(), ".md") {
+			markdownFiles = append(markdownFiles, file.Name())
+		}
+	}
+
+	return markdownFiles
+}
+
 func main() {
 	templateDir := "templates"
 
-	// Parse command-line arguments
+	// Define the flags for both short and long forms
+	var wizardFlag bool
+	flag.BoolVar(&wizardFlag, "w", false, "Run in wizard mode (interactive prompts for optionals)")
+	flag.BoolVar(&wizardFlag, "wizard", false, "Run in wizard mode (interactive prompts for optionals)")
 	flag.Parse()
 	args := flag.Args()
 
 	var template, templateName, name, tagsInput, date string
 
-	// If no arguments are provided, use the default template
-	if len(args) == 0 {
-		template = "task.md" // Set the default template name to "default"
-	} else if len(args) == 1 {
-		// If two or more arguments are provided, use the provided template and name
-		template = args[0]
-	} else if len(args) >= 2 {
-		// If two or more arguments are provided, use the provided template and name
-		template = args[0]
-		name = args[1]
-		tagsInput = getUserInput("Tags (optional, JSON-formatted array): ")
-		date = getUserInput("Date (optional): ")
-	} else {
-		// If only one argument is provided, prompt for template and name
-		template = args[0]
-		templateName = getUserInput("Template name (optional): ")
+	folderPath := "templates/"
+	templates := strings.Join(listMarkdownFiles(folderPath), ", ")
+	// Check if the wizard flag is provided
+	if wizardFlag {
+		// Run in wizard mode with interactive prompts for optionals
+
+		//templateName = getUserInput("Template name (possible templates: %s): ", templates)
+		// Prompt the user for template name with the possible templates shown
+		templateName = getUserInput("Template name (possible templates: %s): ", templates)
+		template = templateName
 		name = getUserInput("Name (optional): ")
 		tagsInput = getUserInput("Tags (optional, JSON-formatted array): ")
 		date = getUserInput("Date (optional): ")
+	} else {
+		if len(args) == 0 {
+			template = "task.md" // Set the default template name to "default"
+		} else if len(args) == 1 {
+			// If two or more arguments are provided, use the provided template and name
+			template = args[0]
+		} else if len(args) >= 2 {
+			// If two or more arguments are provided, use the provided template and name
+			template = args[0]
+			name = args[1]
+			tagsInput = getUserInput("Tags (optional, JSON-formatted array): ")
+			date = getUserInput("Date (optional): ")
+		} else {
+			// If only one argument is provided, prompt for template and name
+			template = args[0]
+			templateName = getUserInput("Template name (optional): ")
+			name = getUserInput("Name (optional): ")
+			tagsInput = getUserInput("Tags (optional, JSON-formatted array): ")
+			date = getUserInput("Date (optional): ")
+		}
 	}
-
 	if date == "" {
 		// If no explicit date is provided, use the current date
 		now := time.Now()
