@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -78,7 +80,7 @@ func listMarkdownFiles(folderPath string) []string {
 
 	files, err := ioutil.ReadDir(folderPath)
 	if err != nil {
-		fmt.Printf("Error reading the folder: %s\n", err)
+		fmt.Printf("Warning: Reading the folder %s\n", err)
 		return nil
 	}
 
@@ -96,8 +98,30 @@ func listMarkdownFiles(folderPath string) []string {
 	return markdownFiles
 }
 
+func openMarkdownFile(filePath string) error {
+	cmd := exec.Command("xdg-open", filePath) // Try xdg-open for Linux
+	if runtime.GOOS == "darwin" {
+		cmd = exec.Command("open", filePath) // For macOS, use "open" command
+	} else if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", "start", filePath) // For Windows, use "cmd" and "start" command
+	}
+	err := cmd.Start()
+	return err
+}
+
 func main() {
-	templateDir := "templates"
+	// Get the absolute path to the executable
+	exePath, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Error getting the executable path: %s\n", err)
+		return
+	}
+
+	// Get the directory path of the executable
+	exeDir := filepath.Dir(exePath)
+
+	// Update the template directory to be relative to the executable location
+	templateDir := filepath.Join(exeDir, "templates")
 
 	// Define the flags for both short and long forms
 	var wizardFlag bool
@@ -170,4 +194,8 @@ func main() {
 	}
 
 	createMarkdownFile(templatePath, outputFile, date, name, tags)
+	// Open the generated markdown file with the default program associated with its file type
+	if err := openMarkdownFile(outputFile); err != nil {
+		fmt.Printf("Error opening the markdown file: %s\n", err)
+	}
 }
